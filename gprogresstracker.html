@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GATE 2026 Progress Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body.dark-mode {
+      background-color: #1f2937;
+      color: #f3f4f6;
+    }
+    body.dark-mode .bg-white {
+      background-color: #374151;
+    }
+    body.dark-mode .bg-gray-100 {
+      background-color: #1f2937;
+    }
+    body.dark-mode .bg-gray-200 {
+      background-color: #4b5563;
+    }
+    body.dark-mode .bg-blue-100 {
+      background-color: #1e40af;
+    }
+    body.dark-mode .bg-green-100 {
+      background-color: #166534;
+    }
+    body.dark-mode .bg-yellow-100 {
+      background-color: #854d0e;
+    }
+    body.dark-mode .text-blue-600 {
+      color: #60a5fa;
+    }
+    body.dark-mode .text-green-600 {
+      color: #4ade80;
+    }
+    body.dark-mode .text-yellow-600 {
+      color: #fbbf24;
+    }
+    body.dark-mode .border {
+      border-color: #4b5563;
+    }
+    body.dark-mode input,
+    body.dark-mode select,
+    body.dark-mode textarea {
+      background-color: #4b5563;
+      color: #f3f4f6;
+      border-color: #6b7280;
+    }
+    body.dark-mode .hover\:bg-blue-700:hover {
+      background-color: #1d4ed8;
+    }
+    body.dark-mode .hover\:bg-red-700:hover {
+      background-color: #b91c1c;
+    }
+    body.dark-mode .text-red-600 {
+      color: #f87171;
+    }
+    .topic-table {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    textarea {
+      resize: none;
+    }
+    .chart-container {
+      max-width: 200px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+  <div class="w-full max-w-5xl bg-white rounded-lg shadow-lg p-6">
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+      <h1 class="text-2xl sm:text-3xl font-bold text-blue-600">GATE 2026 Progress Tracker (EC & DA)</h1>
+      <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
+        <button id="darkModeButton" onclick="toggleDarkMode()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 w-full sm:w-auto">Toggle Night Mode</button>
+        <button onclick="initiateReset()" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 w-full sm:w-auto">Reset All Data</button>
+      </div>
+    </div>
+
+    <!-- Progress Summary -->
+    <div class="mb-8">
+      <h2 class="text-xl font-semibold mb-4">Progress Summary</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+        <div class="bg-blue-100 p-4 rounded-md">
+          <h3 class="font-medium">EC Completion</h3>
+          <p id="ecProgress" class="text-lg">0%</p>
+        </div>
+        <div class="bg-green-100 p-4 rounded-md">
+          <h3 class="font-medium">DA Completion</h3>
+          <p id="daProgress" class="text-lg">0%</p>
+        </div>
+        <div class="bg-yellow-100 p-4 rounded-md">
+          <h3 class="font-medium">GA Completion</h3>
+          <p id="gaProgress" class="text-lg">0%</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="chart-container">
+          <canvas id="ecChart" width="200" height="100"></canvas>
+        </div>
+        <div class="chart-container">
+          <canvas id="daChart" width="200" height="100"></canvas>
+        </div>
+        <div class="chart-container">
+          <canvas id="gaChart" width="200" height="100"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Topic List -->
+    <div class="mb-8">
+      <h2 class="text-xl font-semibold mb-4">Syllabus Topics</h2>
+      <div class="space-y-6">
+        <div>
+          <h3 class="text-lg font-medium text-blue-600">Electronics & Communication (EC)</h3>
+          <div class="topic-table">
+            <table class="w-full border-collapse">
+              <thead>
+                <tr class="bg-gray-200">
+                  <th class="border p-2">Topic</th>
+                  <th class="border p-2">Tag</th>
+                  <th class="border p-2">Status</th>
+                  <th class="border p-2">Notes</th>
+                </tr>
+              </thead>
+              <tbody id="ecTopics"></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-lg font-medium text-green-600">Data Science & AI (DA)</h3>
+          <div class="topic-table">
+            <table class="w-full border-collapse">
+              <thead>
+                <tr class="bg-gray-200">
+                  <th class="border p-2">Topic</th>
+                  <th class="border p-2">Tag</th>
+                  <th class="border p-2">Status</th>
+                  <th class="border p-2">Notes</th>
+                </tr>
+              </thead>
+              <tbody id="daTopics"></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-lg font-medium text-yellow-600">General Aptitude (GA)</h3>
+          <div class="topic-table">
+            <table class="w-full border-collapse">
+              <thead>
+                <tr class="bg-gray-200">
+                  <th class="border p-2">Topic</th>
+                  <th class="border p-2">Tag</th>
+                  <th class="border p-2">Status</th>
+                  <th class="border p-2">Notes</th>
+                </tr>
+              </thead>
+              <tbody id="gaTopics"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task Input Form -->
+    <div class="mb-8">
+      <h2 class="text-xl font-semibold mb-4">Add Daily Task/Notes</h2>
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Date</label>
+          <input type="date" id="taskDate" class="mt-1 p-2 w-full border rounded-md" value="">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Subject</label>
+          <select id="subject" class="mt-1 p-2 w-full border rounded-md">
+            <option value="EC">Electronics & Communication (EC)</option>
+            <option value="DA">Data Science & AI (DA)</option>
+            <option value="GA">General Aptitude (GA)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Topic</label>
+          <input type="text" id="topic" class="mt-1 p-2 w-full border rounded-md" placeholder="e.g., Linear Algebra, Python">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Completion Status</label>
+          <select id="status" class="mt-1 p-2 w-full border rounded-md">
+            <option value="Not Started">Not Started</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-sm font-medium text-gray-700">Notes</label>
+          <textarea id="notes" class="mt-1 p-2 w-full border rounded-md" rows="4" placeholder="e.g., Struggled with FFT, need to revise"></textarea>
+        </div>
+        <div class="sm:col-span-2">
+          <button onclick="addTask()" class="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700">Add Task</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task History -->
+    <div>
+      <h2 class="text-xl font-semibold mb-4">Task History</h2>
+      <div class="topic-table">
+        <table class="w-full border-collapse">
+          <thead>
+            <tr class="bg-gray-200">
+              <th class="border p-2">Date</th>
+              <th class="border p-2">Subject</th>
+              <th class="border p-2">Topic</th>
+              <th class="border p-2">Status</th>
+              <th class="border p-2">Notes</th>
+              <th class="border p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="taskTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Predefined syllabus topics based on GATE 2026 EC and DA syllabi
+    const syllabus = {
+      EC: [
+        // Engineering Mathematics
+        "Linear Algebra: Matrices, Determinants, Eigenvalues",
+        "Calculus: Limits, Continuity, Differentiation, Integration",
+        "Differential Equations: First Order, Higher Order",
+        "Vector Analysis: Gradient, Divergence, Curl",
+        "Complex Analysis: Analytic Functions, Cauchy’s Theorem",
+        "Probability and Statistics: Mean, Variance, Probability Distributions",
+        "Numerical Methods: Solutions of Equations, Interpolation",
+        // Networks
+        "Network Solution Methods: KCL, KVL, Node/Mesh Analysis",
+        "Network Theorems: Thevenin, Norton, Superposition",
+        "Steady State Analysis: Sinusoidal, Phasor Analysis",
+        "Transient Analysis: RL, RC, RLC Circuits",
+        "Two-Port Networks: Z, Y, h, ABCD Parameters",
+        // Signals and Systems
+        "LTI Systems: Convolution, Impulse Response",
+        "Fourier Series and Transform",
+        "Laplace Transform",
+        "Z-Transform",
+        "Sampling Theorem",
+        "DTFT and DFT",
+        // Electronic Devices
+        "Semiconductors: Energy Bands, Carrier Transport",
+        "PN Junctions, Diodes",
+        "BJT, MOSFET, JFET",
+        "Optoelectronic Devices",
+        // Analog Circuits
+        "Amplifiers: Small Signal Analysis, Frequency Response",
+        "Operational Amplifiers: Applications",
+        "Oscillators and Feedback Amplifiers",
+        "Power Supplies: Rectifiers, Filters",
+        // Digital Circuits
+        "Number Systems, Boolean Algebra",
+        "Combinational Circuits: Gates, Multiplexers",
+        "Sequential Circuits: Flip-Flops, Counters",
+        "Microprocessors: 8085 Architecture",
+        "Logic Families: TTL, CMOS",
+        // Control Systems
+        "Block Diagrams, Signal Flow Graphs",
+        "Time Domain Analysis: Transient, Steady-State",
+        "Frequency Domain Analysis: Bode, Nyquist Plots",
+        "Stability: Routh-Hurwitz, Root Locus",
+        "Compensators and Controllers",
+        // Communications
+        "Analog Communication: AM, FM, Noise",
+        "Digital Communication: PCM, DPCM, Modulation",
+        "Information Theory: Entropy, Channel Capacity",
+        "Random Processes",
+        // Electromagnetics
+        "Electrostatics: Coulomb’s Law, Gauss’s Law",
+        "Magnetostatics: Biot-Savart, Ampere’s Law",
+        "Maxwell’s Equations",
+        "Transmission Lines",
+        "Waveguides and Antennas"
+      ],
+      DA: [
+        // Probability and Statistics
+        "Counting: Permutations, Combinations",
+        "Probability: Axioms, Conditional Probability",
+        "Random Variables: PDF, CDF, Expectation",
+        "Distributions: Binomial, Poisson, Normal",
+        "Hypothesis Testing, Confidence Intervals",
+        "Correlation and Regression",
+        // Linear Algebra
+        "Matrices: Operations, Inverse, Rank",
+        "Eigenvalues and Eigenvectors",
+        "Vector Spaces, Linear Transformations",
+        // Calculus
+        "Functions: Limits, Continuity",
+        "Differentiation: Partial Derivatives, Gradient",
+        "Optimization: Maxima, Minima",
+        // Programming
+        "Python: Variables, Loops, Functions",
+        "Data Structures: Arrays, Lists, Stacks, Queues",
+        "Algorithms: Sorting, Searching, Recursion",
+        "Time Complexity Analysis",
+        // Database Management
+        "Relational Model: Keys, Normalization",
+        "SQL: Queries, Joins, Subqueries",
+        "ER Models, Transactions",
+        // Machine Learning
+        "Supervised Learning: Linear Regression, Logistic Regression",
+        "Classification: SVM, Decision Trees, KNN",
+        "Unsupervised Learning: K-Means, PCA",
+        "Ensemble Methods: Random Forest, Boosting",
+        "Evaluation Metrics: Accuracy, Precision, Recall",
+        "Feature Engineering",
+        // Artificial Intelligence
+        "Search: BFS, DFS, A* Algorithm",
+        "Logic: Propositional, First-Order",
+        "Knowledge Representation",
+        "Machine Learning in AI",
+        // Data Visualization
+        "Data Summarization",
+        "Visualization Techniques: Plots, Charts"
+      ],
+      GA: [
+        "Quantitative Aptitude: Ratios, Percentages, Profit/Loss",
+        "Data Interpretation: Tables, Graphs, Charts",
+        "Logical Reasoning: Sequences, Puzzles, Syllogisms",
+        "Verbal Ability: Reading Comprehension, Grammar",
+        "Vocabulary: Synonyms, Antonyms, Sentence Completion"
+      ]
+    };
+
+    // Common topics between EC and DA
+    const commonTopics = [
+      "Linear Algebra: Matrices, Determinants, Eigenvalues",
+      "Matrices: Operations, Inverse, Rank",
+      "Eigenvalues and Eigenvectors",
+      "Calculus: Limits, Continuity, Differentiation, Integration",
+      "Functions: Limits, Continuity",
+      "Differentiation: Partial Derivatives, Gradient",
+      "Probability and Statistics: Mean, Variance, Probability Distributions",
+      "Probability: Axioms, Conditional Probability",
+      "Random Variables: PDF, CDF, Expectation",
+      "Distributions: Binomial, Poisson, Normal",
+      "Hypothesis Testing, Confidence Intervals",
+      "Numerical Methods: Solutions of Equations, Interpolation",
+      "Optimization: Maxima, Minima",
+      "Vector Analysis: Gradient, Divergence, Curl",
+      "Vector Spaces, Linear Transformations"
+    ];
+
+    // Initialize tasks and topic statuses from localStorage
+    let tasks = JSON.parse(localStorage.getItem('gateTasks')) || [];
+    let topicStatuses = JSON.parse(localStorage.getItem('gateTopicStatuses')) || {
+      EC: syllabus.EC.map(topic => ({ topic, status: "Not Started", notes: "" })),
+      DA: syllabus.DA.map(topic => ({ topic, status: "Not Started", notes: "" })),
+      GA: syllabus.GA.map(topic => ({ topic, status: "Not Started", notes: "" }))
+    };
+    let isDarkMode = JSON.parse(localStorage.getItem('darkMode')) || false;
+
+    // Apply dark mode if enabled
+    if (isDarkMode) {
+      document.body.classList.add('dark-mode');
+      document.getElementById('darkModeButton').textContent = 'Disable Night Mode';
+    } else {
+      document.getElementById('darkModeButton').textContent = 'Enable Night Mode';
+    }
+
+    // Function to initiate reset with two-step confirmation
+    function initiateReset() {
+      if (confirm('Are you sure you want to reset all data?')) {
+        if (confirm('This will reset all statuses, notes, tasks, and dark mode settings. Proceed?')) {
+          resetData();
+        }
+      }
+    }
+
+    // Function to reset all data
+    function resetData() {
+      // Clear localStorage
+      localStorage.removeItem('gateTasks');
+      localStorage.removeItem('gateTopicStatuses');
+      localStorage.removeItem('darkMode');
+
+      // Reinitialize data
+      tasks = [];
+      topicStatuses = {
+        EC: syllabus.EC.map(topic => ({ topic, status: "Not Started", notes: "" })),
+        DA: syllabus.DA.map(topic => ({ topic, status: "Not Started", notes: "" })),
+        GA: syllabus.GA.map(topic => ({ topic, status: "Not Started", notes: "" }))
+      };
+      isDarkMode = false;
+
+      // Save reinitialized data to localStorage
+      localStorage.setItem('gateTasks', JSON.stringify(tasks));
+      localStorage.setItem('gateTopicStatuses', JSON.stringify(topicStatuses));
+      localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
+
+      // Update UI
+      document.body.classList.remove('dark-mode');
+      document.getElementById('darkModeButton').textContent = 'Enable Night Mode';
+      updateTopicTables();
+      updateTaskTable();
+      updateCharts();
+    }
+
+    // Function to toggle dark mode
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+      isDarkMode = document.body.classList.contains('dark-mode');
+      document.getElementById('darkModeButton').textContent = isDarkMode ? 'Disable Night Mode' : 'Enable Night Mode';
+      localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
+    }
+
+    // Function to update topic status
+    function updateTopicStatus(subject, topic, status) {
+      topicStatuses[subject] = topicStatuses[subject].map(item =>
+        item.topic === topic ? { ...item, status } : item
+      );
+      localStorage.setItem('gateTopicStatuses', JSON.stringify(topicStatuses));
+      updateTopicTables();
+      updateProgress();
+      updateCharts();
+    }
+
+    // Function to update topic notes
+    function updateTopicNotes(subject, topic, notes) {
+      topicStatuses[subject] = topicStatuses[subject].map(item =>
+        item.topic === topic ? { ...item, notes } : item
+      );
+      localStorage.setItem('gateTopicStatuses', JSON.stringify(topicStatuses));
+    }
+
+    // Function to update topic tables
+    function updateTopicTables() {
+      const subjects = ['EC', 'DA', 'GA'];
+      subjects.forEach(subject => {
+        const tableBody = document.getElementById(`${subject.toLowerCase()}Topics`);
+        tableBody.innerHTML = '';
+        topicStatuses[subject].forEach(item => {
+          const isCommon = commonTopics.includes(item.topic);
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td class="border p-2">${item.topic}</td>
+            <td class="border p-2">${isCommon ? '<span class="bg-purple-200 text-purple-800 px-2 py-1 rounded">Common</span>' : ''}</td>
+            <td class="border p-2">
+              <select onchange="updateTopicStatus('${subject}', '${item.topic}', this.value)" class="p-1 border rounded-md w-full">
+                <option value="Not Started" ${item.status === "Not Started" ? "selected" : ""}>Not Started</option>
+                <option value="In Progress" ${item.status === "In Progress" ? "selected" : ""}>In Progress</option>
+                <option value="Completed" ${item.status === "Completed" ? "selected" : ""}>Completed</option>
+              </select>
+            </td>
+            <td class="border p-2">
+              <textarea onchange="updateTopicNotes('${subject}', '${item.topic}', this.value)" class="p-1 border rounded-md w-full" rows="2" placeholder="Add notes (e.g., resources, doubts)">${item.notes}</textarea>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      });
+    }
+
+    // Function to add a new task
+    function addTask() {
+      const taskDate = document.getElementById('taskDate').value;
+      const subject = document.getElementById('subject').value;
+      const topic = document.getElementById('topic').value;
+      const status = document.getElementById('status').value;
+      const notes = document.getElementById('notes').value;
+
+      if (!taskDate || !topic) {
+        alert('Please fill in Date and Topic.');
+        return;
+      }
+
+      const task = { id: Date.now(), date: taskDate, subject, topic, status, notes };
+      tasks.push(task);
+      localStorage.setItem('gateTasks', JSON.stringify(tasks));
+      updateTaskTable();
+      clearForm();
+      alert('Task added successfully!');
+    }
+
+    // Function to clear form inputs
+    function clearForm() {
+      document.getElementById('taskDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('subject').value = 'EC';
+      document.getElementById('topic').value = '';
+      document.getElementById('status').value = 'Not Started';
+      document.getElementById('notes').value = '';
+    }
+
+    // Function to delete a task
+    function deleteTask(id) {
+      tasks = tasks.filter(task => task.id !== id);
+      localStorage.setItem('gateTasks', JSON.stringify(tasks));
+      updateTaskTable();
+    }
+
+    // Function to update task table
+    function updateTaskTable() {
+      const tableBody = document.getElementById('taskTable');
+      tableBody.innerHTML = '';
+      tasks.sort((a, b) => new Date(b.date) - new Date(a.date));
+      tasks.forEach(task => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="border p-2">${task.date}</td>
+          <td class="border p-2">${task.subject}</td>
+          <td class="border p-2">${task.topic}</td>
+          <td class="border p-2">${task.status}</td>
+          <td class="border p-2">${task.notes}</td>
+          <td class="border p-2">
+            <button onclick="deleteTask(${task.id})" class="text-red-600 hover:underline">Delete</button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    // Function to update progress percentages
+    function updateProgress() {
+      const subjects = ['EC', 'DA', 'GA'];
+      const progress = {};
+      subjects.forEach(subject => {
+        const totalTopics = topicStatuses[subject].length;
+        const completedTopics = topicStatuses[subject].filter(item => item.status === 'Completed').length;
+        const prog = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
+        document.getElementById(`${subject.toLowerCase()}Progress`).textContent = `${prog}%`;
+        progress[subject] = prog;
+      });
+      return progress;
+    }
+
+    // Function to update charts
+    function updateCharts() {
+      const progress = updateProgress();
+      const subjects = ['EC', 'DA', 'GA'];
+      subjects.forEach(subject => {
+        const ctx = document.getElementById(`${subject.toLowerCase()}Chart`).getContext('2d');
+        if (window[`${subject}Chart`]) {
+          window[`${subject}Chart`].destroy();
+        }
+        window[`${subject}Chart`] = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Completed', 'Remaining'],
+            datasets: [{
+              data: [progress[subject], 100 - progress[subject]],
+              backgroundColor: ['#36a2eb', '#e5e7eb'],
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            animation: {
+              duration: 1000,
+              easing: 'easeInOutQuad'
+            },
+            plugins: {
+              legend: { position: 'top', labels: { font: { size: 10 } } },
+              title: { display: true, text: `${subject} Progress`, font: { size: 12 } }
+            }
+          }
+        });
+      });
+    }
+
+    // Set default date to today
+    document.getElementById('taskDate').value = new Date().toISOString().split('T')[0];
+
+    // Initial updates
+    updateTopicTables();
+    updateTaskTable();
+    updateCharts();
+  </script>
+</body>
+</html>
