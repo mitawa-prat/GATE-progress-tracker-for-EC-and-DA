@@ -68,103 +68,73 @@
       max-width: 200px;
       margin: 0 auto;
     }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+    }
+    body.dark-mode .modal-content {
+      background-color: #374151;
+      color: #f3f4f6;
+    }
   </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+  <!-- Paper Selection Modal -->
+  <div id="paperModal" class="modal">
+    <div class="modal-content">
+      <h2 class="text-xl font-semibold mb-4">Select GATE 2026 Papers</h2>
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700">Number of Papers</label>
+        <select id="numPapers" class="mt-1 p-2 w-full border rounded-md" onchange="togglePaperInputs()">
+          <option value="1">1 Paper</option>
+          <option value="2">2 Papers</option>
+        </select>
+      </div>
+      <div id="paper1Input" class="mb-4">
+        <label class="block text-sm font-medium text-gray-700">Primary Paper</label>
+        <select id="paper1" class="mt-1 p-2 w-full border rounded-md"></select>
+      </div>
+      <div id="paper2Input" class="mb-4 hidden">
+        <label class="block text-sm font-medium text-gray-700">Secondary Paper</label>
+        <select id="paper2" class="mt-1 p-2 w-full border rounded-md"></select>
+      </div>
+      <button onclick="savePaperSelection()" class="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700">Save Selection</button>
+    </div>
+  </div>
+  <!-- Main Tracker -->
   <div class="w-full max-w-5xl bg-white rounded-lg shadow-lg p-6">
     <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-      <h1 class="text-2xl sm:text-3xl font-bold text-blue-600">GATE 2026 Progress Tracker (EC & DA)</h1>
+      <h1 id="trackerTitle" class="text-2xl sm:text-3xl font-bold text-blue-600">GATE 2026 Progress Tracker</h1>
       <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
         <button id="darkModeButton" onclick="toggleDarkMode()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 w-full sm:w-auto">Toggle Night Mode</button>
         <button onclick="initiateReset()" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 w-full sm:w-auto">Reset All Data</button>
       </div>
     </div>
-
     <!-- Progress Summary -->
     <div class="mb-8">
       <h2 class="text-xl font-semibold mb-4">Progress Summary</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-        <div class="bg-blue-100 p-4 rounded-md">
-          <h3 class="font-medium">EC Completion</h3>
-          <p id="ecProgress" class="text-lg">0%</p>
-        </div>
-        <div class="bg-green-100 p-4 rounded-md">
-          <h3 class="font-medium">DA Completion</h3>
-          <p id="daProgress" class="text-lg">0%</p>
-        </div>
-        <div class="bg-yellow-100 p-4 rounded-md">
-          <h3 class="font-medium">GA Completion</h3>
-          <p id="gaProgress" class="text-lg">0%</p>
-        </div>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="chart-container">
-          <canvas id="ecChart" width="200" height="100"></canvas>
-        </div>
-        <div class="chart-container">
-          <canvas id="daChart" width="200" height="100"></canvas>
-        </div>
-        <div class="chart-container">
-          <canvas id="gaChart" width="200" height="100"></canvas>
-        </div>
-      </div>
+      <div id="progressSummary" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4"></div>
+      <div id="chartContainer" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
     </div>
-
     <!-- Topic List -->
-    <div class="mb-8">
+    <div id="topicList" class="mb-8">
       <h2 class="text-xl font-semibold mb-4">Syllabus Topics</h2>
-      <div class="space-y-6">
-        <div>
-          <h3 class="text-lg font-medium text-blue-600">Electronics & Communication (EC)</h3>
-          <div class="topic-table">
-            <table class="w-full border-collapse">
-              <thead>
-                <tr class="bg-gray-200">
-                  <th class="border p-2">Topic</th>
-                  <th class="border p-2">Tag</th>
-                  <th class="border p-2">Status</th>
-                  <th class="border p-2">Notes</th>
-                </tr>
-              </thead>
-              <tbody id="ecTopics"></tbody>
-            </table>
-          </div>
-        </div>
-        <div>
-          <h3 class="text-lg font-medium text-green-600">Data Science & AI (DA)</h3>
-          <div class="topic-table">
-            <table class="w-full border-collapse">
-              <thead>
-                <tr class="bg-gray-200">
-                  <th class="border p-2">Topic</th>
-                  <th class="border p-2">Tag</th>
-                  <th class="border p-2">Status</th>
-                  <th class="border p-2">Notes</th>
-                </tr>
-              </thead>
-              <tbody id="daTopics"></tbody>
-            </table>
-          </div>
-        </div>
-        <div>
-          <h3 class="text-lg font-medium text-yellow-600">General Aptitude (GA)</h3>
-          <div class="topic-table">
-            <table class="w-full border-collapse">
-              <thead>
-                <tr class="bg-gray-200">
-                  <th class="border p-2">Topic</th>
-                  <th class="border p-2">Tag</th>
-                  <th class="border p-2">Status</th>
-                  <th class="border p-2">Notes</th>
-                </tr>
-              </thead>
-              <tbody id="gaTopics"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+      <div id="topicTables" class="space-y-6"></div>
     </div>
-
     <!-- Task Input Form -->
     <div class="mb-8">
       <h2 class="text-xl font-semibold mb-4">Add Daily Task/Notes</h2>
@@ -175,11 +145,7 @@
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">Subject</label>
-          <select id="subject" class="mt-1 p-2 w-full border rounded-md">
-            <option value="EC">Electronics & Communication (EC)</option>
-            <option value="DA">Data Science & AI (DA)</option>
-            <option value="GA">General Aptitude (GA)</option>
-          </select>
+          <select id="subject" class="mt-1 p-2 w-full border rounded-md"></select>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">Topic</label>
@@ -202,7 +168,6 @@
         </div>
       </div>
     </div>
-
     <!-- Task History -->
     <div>
       <h2 class="text-xl font-semibold mb-4">Task History</h2>
@@ -223,144 +188,302 @@
       </div>
     </div>
   </div>
-
   <script>
-    // Predefined syllabus topics based on GATE 2026 EC and DA syllabi
+    // Comprehensive syllabus for all 30 GATE 2026 papers
     const syllabus = {
-      EC: [
-        // Engineering Mathematics
-        "Linear Algebra: Matrices, Determinants, Eigenvalues",
-        "Calculus: Limits, Continuity, Differentiation, Integration",
-        "Differential Equations: First Order, Higher Order",
-        "Vector Analysis: Gradient, Divergence, Curl",
-        "Complex Analysis: Analytic Functions, Cauchy’s Theorem",
-        "Probability and Statistics: Mean, Variance, Probability Distributions",
-        "Numerical Methods: Solutions of Equations, Interpolation",
-        // Networks
-        "Network Solution Methods: KCL, KVL, Node/Mesh Analysis",
-        "Network Theorems: Thevenin, Norton, Superposition",
-        "Steady State Analysis: Sinusoidal, Phasor Analysis",
-        "Transient Analysis: RL, RC, RLC Circuits",
-        "Two-Port Networks: Z, Y, h, ABCD Parameters",
-        // Signals and Systems
-        "LTI Systems: Convolution, Impulse Response",
-        "Fourier Series and Transform",
-        "Laplace Transform",
-        "Z-Transform",
-        "Sampling Theorem",
-        "DTFT and DFT",
-        // Electronic Devices
-        "Semiconductors: Energy Bands, Carrier Transport",
-        "PN Junctions, Diodes",
-        "BJT, MOSFET, JFET",
-        "Optoelectronic Devices",
-        // Analog Circuits
-        "Amplifiers: Small Signal Analysis, Frequency Response",
-        "Operational Amplifiers: Applications",
-        "Oscillators and Feedback Amplifiers",
-        "Power Supplies: Rectifiers, Filters",
-        // Digital Circuits
-        "Number Systems, Boolean Algebra",
-        "Combinational Circuits: Gates, Multiplexers",
-        "Sequential Circuits: Flip-Flops, Counters",
-        "Microprocessors: 8085 Architecture",
-        "Logic Families: TTL, CMOS",
-        // Control Systems
-        "Block Diagrams, Signal Flow Graphs",
-        "Time Domain Analysis: Transient, Steady-State",
-        "Frequency Domain Analysis: Bode, Nyquist Plots",
-        "Stability: Routh-Hurwitz, Root Locus",
-        "Compensators and Controllers",
-        // Communications
-        "Analog Communication: AM, FM, Noise",
-        "Digital Communication: PCM, DPCM, Modulation",
-        "Information Theory: Entropy, Channel Capacity",
-        "Random Processes",
-        // Electromagnetics
-        "Electrostatics: Coulomb’s Law, Gauss’s Law",
-        "Magnetostatics: Biot-Savart, Ampere’s Law",
-        "Maxwell’s Equations",
-        "Transmission Lines",
-        "Waveguides and Antennas"
+      AE: [
+        "Flight Mechanics: Atmosphere, Airplane Performance",
+        "Aerodynamics: Airfoils, Lift, Drag",
+        "Structures: Stress-Strain, Flight Vehicle Structures",
+        "Propulsion: Gas Turbines, Rocket Propulsion",
+        "Space Dynamics: Orbital Mechanics",
+        "Engineering Mathematics: Linear Algebra, Calculus, Differential Equations"
+      ],
+      AG: [
+        "Farm Machinery: Design, Operation",
+        "Soil and Water Conservation: Irrigation, Drainage",
+        "Agricultural Processing: Drying, Milling",
+        "Farm Power: Engines, Tractors",
+        "Engineering Mathematics: Linear Algebra, Calculus"
+      ],
+      AR: [
+        "Architecture: History, Design",
+        "Planning: Urban, Regional",
+        "Building Materials and Construction",
+        "Environmental Planning: Sustainability",
+        "Infrastructure: Transport, Water Supply"
+      ],
+      BM: [
+        "Human Anatomy and Physiology",
+        "Biomedical Instrumentation: Sensors, Amplifiers",
+        "Biomechanics: Kinematics, Kinetics",
+        "Medical Imaging: X-Ray, MRI",
+        "Biomaterials",
+        "Engineering Mathematics: Linear Algebra, Probability"
+      ],
+      BT: [
+        "Biochemistry: Enzymes, Metabolism",
+        "Microbiology: Microbial Genetics",
+        "Molecular Biology: DNA, RNA",
+        "Bioprocess Engineering: Fermentation",
+        "Immunology",
+        "Engineering Mathematics: Calculus, Numerical Methods"
+      ],
+      CE: [
+        "Structural Engineering: Beams, Columns",
+        "Geotechnical Engineering: Soil Mechanics",
+        "Water Resources: Hydrology, Irrigation",
+        "Transportation Engineering: Highways, Traffic",
+        "Environmental Engineering: Water Treatment",
+        "Engineering Mathematics: Linear Algebra, Calculus"
+      ],
+      CH: [
+        "Chemical Reaction Engineering: Kinetics, Reactors",
+        "Process Calculations: Material Balance",
+        "Fluid Mechanics: Flow, Pumps",
+        "Heat Transfer: Conduction, Convection",
+        "Mass Transfer: Distillation, Absorption",
+        "Engineering Mathematics: Differential Equations"
+      ],
+      CS: [
+        "Algorithms: Sorting, Graph Algorithms",
+        "Data Structures: Arrays, Trees",
+        "Operating Systems: Processes, Memory Management",
+        "Databases: SQL, Normalization",
+        "Computer Networks: OSI, TCP/IP",
+        "Engineering Mathematics: Discrete Math, Probability"
+      ],
+      CY: [
+        "Physical Chemistry: Thermodynamics, Kinetics",
+        "Inorganic Chemistry: Coordination Compounds",
+        "Organic Chemistry: Reaction Mechanisms",
+        "Analytical Chemistry: Spectroscopy",
+        "Quantum Chemistry"
       ],
       DA: [
-        // Probability and Statistics
-        "Counting: Permutations, Combinations",
-        "Probability: Axioms, Conditional Probability",
-        "Random Variables: PDF, CDF, Expectation",
-        "Distributions: Binomial, Poisson, Normal",
-        "Hypothesis Testing, Confidence Intervals",
-        "Correlation and Regression",
-        // Linear Algebra
-        "Matrices: Operations, Inverse, Rank",
-        "Eigenvalues and Eigenvectors",
-        "Vector Spaces, Linear Transformations",
-        // Calculus
-        "Functions: Limits, Continuity",
-        "Differentiation: Partial Derivatives, Gradient",
-        "Optimization: Maxima, Minima",
-        // Programming
-        "Python: Variables, Loops, Functions",
-        "Data Structures: Arrays, Lists, Stacks, Queues",
-        "Algorithms: Sorting, Searching, Recursion",
-        "Time Complexity Analysis",
-        // Database Management
-        "Relational Model: Keys, Normalization",
-        "SQL: Queries, Joins, Subqueries",
-        "ER Models, Transactions",
-        // Machine Learning
-        "Supervised Learning: Linear Regression, Logistic Regression",
-        "Classification: SVM, Decision Trees, KNN",
-        "Unsupervised Learning: K-Means, PCA",
-        "Ensemble Methods: Random Forest, Boosting",
-        "Evaluation Metrics: Accuracy, Precision, Recall",
-        "Feature Engineering",
-        // Artificial Intelligence
-        "Search: BFS, DFS, A* Algorithm",
-        "Logic: Propositional, First-Order",
-        "Knowledge Representation",
-        "Machine Learning in AI",
-        // Data Visualization
-        "Data Summarization",
-        "Visualization Techniques: Plots, Charts"
+        "Probability and Statistics: Distributions, Hypothesis Testing",
+        "Linear Algebra: Matrices, Eigenvalues",
+        "Calculus: Optimization, Partial Derivatives",
+        "Programming: Python, Data Structures",
+        "Machine Learning: Regression, Classification",
+        "Data Visualization: Plots, Charts"
+      ],
+      EC: [
+        "Engineering Mathematics: Linear Algebra, Calculus, Probability",
+        "Networks: KCL, KVL, Thevenin",
+        "Signals and Systems: Fourier, Laplace, Z-Transform",
+        "Electronic Devices: Semiconductors, Diodes",
+        "Analog Circuits: Amplifiers, Oscillators",
+        "Digital Circuits: Logic Gates, Microprocessors",
+        "Control Systems: Stability, Bode Plots",
+        "Communications: AM, FM, Digital Modulation",
+        "Electromagnetics: Maxwell’s Equations, Antennas"
+      ],
+      EE: [
+        "Electric Circuits: KCL, KVL, AC Analysis",
+        "Electromagnetic Fields: Maxwell’s Equations",
+        "Signals and Systems: Fourier, Laplace",
+        "Electrical Machines: Transformers, Motors",
+        "Power Systems: Load Flow, Fault Analysis",
+        "Engineering Mathematics: Linear Algebra, Probability"
+      ],
+      ES: [
+        "Environmental Chemistry: Pollutants",
+        "Water and Wastewater Treatment",
+        "Air Pollution: Control Technologies",
+        "Solid Waste Management",
+        "Environmental Laws",
+        "Mathematics: Linear Algebra, Statistics"
+      ],
+      EY: [
+        "Ecology: Ecosystems, Biodiversity",
+        "Evolution: Natural Selection, Genetics",
+        "Behavioral Ecology",
+        "Conservation Biology",
+        "Quantitative Ecology: Statistics"
+      ],
+      GE: [
+        "Surveying: Levelling, Triangulation",
+        "Remote Sensing: GIS, GPS",
+        "Photogrammetry",
+        "Geodesy",
+        "Mathematics: Numerical Methods"
+      ],
+      GG: [
+        "Geology: Mineralogy, Petrology",
+        "Geophysics: Seismic, Gravity",
+        "Structural Geology",
+        "Hydrogeology",
+        "Mathematics: Statistics"
+      ],
+      IN: [
+        "Electrical Circuits: Network Analysis",
+        "Analog Electronics: Amplifiers",
+        "Digital Electronics: Microcontrollers",
+        "Signals and Systems: Transforms",
+        "Sensors and Transducers",
+        "Engineering Mathematics: Linear Algebra, Calculus"
+      ],
+      MA: [
+        "Linear Algebra: Vector Spaces, Eigenvalues",
+        "Calculus: Multivariable, Series",
+        "Differential Equations: ODE, PDE",
+        "Complex Analysis",
+        "Probability and Statistics",
+        "Numerical Analysis"
+      ],
+      ME: [
+        "Mechanics: Statics, Dynamics",
+        "Thermodynamics: Laws, Cycles",
+        "Fluid Mechanics: Flow, Bernoulli",
+        "Heat Transfer: Conduction, Convection",
+        "Manufacturing: Machining, Welding",
+        "Engineering Mathematics: Linear Algebra, Calculus"
+      ],
+      MN: [
+        "Mine Development: Drilling, Blasting",
+        "Mine Ventilation",
+        "Mine Safety",
+        "Rock Mechanics",
+        "Mineral Economics",
+        "Mathematics: Numerical Methods"
+      ],
+      MT: [
+        "Physical Metallurgy: Phase Diagrams",
+        "Mechanical Metallurgy: Stress-Strain",
+        "Extractive Metallurgy: Pyrometallurgy",
+        "Materials Characterization",
+        "Corrosion",
+        "Mathematics: Differential Equations"
+      ],
+      NM: [
+        "Ship Design: Stability, Hydrodynamics",
+        "Marine Structures: Strength",
+        "Marine Propulsion",
+        "Ocean Engineering",
+        "Mathematics: Calculus, Numerical Methods"
+      ],
+      PE: [
+        "Petroleum Formation: Geology",
+        "Drilling Technology",
+        "Reservoir Engineering",
+        "Production Operations",
+        "Refining Processes",
+        "Mathematics: Differential Equations"
+      ],
+      PH: [
+        "Classical Mechanics: Lagrangian, Hamiltonian",
+        "Quantum Mechanics: Wave Functions",
+        "Electromagnetism: Maxwell’s Equations",
+        "Thermodynamics: Statistical Mechanics",
+        "Solid State Physics",
+        "Mathematical Physics"
+      ],
+      PI: [
+        "Manufacturing Processes: Casting, Forming",
+        "Industrial Engineering: Optimization",
+        "Metrology: Measurement Systems",
+        "Production Planning: Scheduling",
+        "Quality Control",
+        "Engineering Mathematics: Linear Algebra"
+      ],
+      ST: [
+        "Probability: Distributions, Expectation",
+        "Statistical Inference: Hypothesis Testing",
+        "Regression Analysis",
+        "Multivariate Analysis",
+        "Stochastic Processes"
+      ],
+      TF: [
+        "Textile Fibres: Natural, Synthetic",
+        "Yarn Manufacture: Spinning",
+        "Fabric Manufacture: Weaving, Knitting",
+        "Textile Testing",
+        "Chemical Processing",
+        "Mathematics: Statistics"
+      ],
+      XE: [
+        "Engineering Mathematics: Linear Algebra, Calculus",
+        "Fluid Mechanics: Flow, Viscosity",
+        "Materials Science: Properties, Composites",
+        "Thermodynamics: Laws, Cycles",
+        "Solid Mechanics: Stress, Strain",
+        "Polymer Science: Synthesis",
+        "Food Technology",
+        "Energy Science: Renewable Energy"
+      ],
+      XH: [
+        "Reasoning and Comprehension",
+        "Economics: Micro, Macro",
+        "English: Literature, Criticism",
+        "Linguistics: Phonetics, Syntax",
+        "Philosophy: Ethics, Logic",
+        "Psychology: Cognitive, Social",
+        "Sociology: Social Theory"
+      ],
+      XL: [
+        "Chemistry: Organic, Inorganic",
+        "Biochemistry: Enzymes, Metabolism",
+        "Botany: Plant Physiology",
+        "Microbiology: Microbial Genetics",
+        "Zoology: Animal Physiology",
+        "Food Technology"
       ],
       GA: [
-        "Quantitative Aptitude: Ratios, Percentages, Profit/Loss",
-        "Data Interpretation: Tables, Graphs, Charts",
-        "Logical Reasoning: Sequences, Puzzles, Syllogisms",
-        "Verbal Ability: Reading Comprehension, Grammar",
-        "Vocabulary: Synonyms, Antonyms, Sentence Completion"
+        "Quantitative Aptitude: Ratios, Percentages",
+        "Data Interpretation: Tables, Graphs",
+        "Logical Reasoning: Puzzles, Syllogisms",
+        "Verbal Ability: Reading Comprehension",
+        "Vocabulary: Synonyms, Antonyms"
       ]
     };
-
-    // Common topics between EC and DA
+    // Allowed two-paper combinations
+    const allowedCombinations = {
+      AE: ['CE', 'ME', 'XE'],
+      AG: ['CE'],
+      AR: ['CE', 'GE'],
+      BM: ['BT', 'IN'],
+      BT: ['BM', 'XL'],
+      CE: ['AE', 'AG', 'AR', 'ES', 'GE', 'NM', 'XE'],
+      CH: ['ES', 'PE', 'XE'],
+      CS: ['DA', 'EC', 'GE', 'MA', 'PH', 'ST'],
+      CY: ['XE', 'XL'],
+      DA: ['CS', 'EC', 'EE', 'MA', 'ME', 'PH', 'ST', 'XE'],
+      EC: ['CS', 'DA', 'EE', 'IN', 'PH'],
+      EE: ['DA', 'EC', 'IN', 'PH'],
+      ES: ['CE', 'CH', 'GE'],
+      EY: ['XL'],
+      GE: ['AR', 'CE', 'CS', 'ES', 'GG'],
+      GG: ['GE'],
+      IN: ['BM', 'EC', 'EE', 'ME'],
+      MA: ['CS', 'DA', 'PH', 'ST'],
+      ME: ['AE', 'DA', 'IN', 'NM', 'PI', 'XE'],
+      MN: [],
+      MT: ['XE'],
+      NM: ['CE', 'ME'],
+      PE: ['CH'],
+      PH: ['CS', 'DA', 'EC', 'EE', 'MA', 'XE'],
+      PI: ['ME', 'XE'],
+      ST: ['CS', 'DA', 'MA', 'XH'],
+      TF: [],
+      XE: ['AE', 'CE', 'CH', 'CY', 'DA', 'ME', 'MT', 'PH', 'PI'],
+      XH: ['ST'],
+      XL: ['BT', 'CY', 'EY']
+    };
+    // Common topics across papers
     const commonTopics = [
       "Linear Algebra: Matrices, Determinants, Eigenvalues",
-      "Matrices: Operations, Inverse, Rank",
-      "Eigenvalues and Eigenvectors",
       "Calculus: Limits, Continuity, Differentiation, Integration",
-      "Functions: Limits, Continuity",
-      "Differentiation: Partial Derivatives, Gradient",
       "Probability and Statistics: Mean, Variance, Probability Distributions",
-      "Probability: Axioms, Conditional Probability",
-      "Random Variables: PDF, CDF, Expectation",
-      "Distributions: Binomial, Poisson, Normal",
-      "Hypothesis Testing, Confidence Intervals",
       "Numerical Methods: Solutions of Equations, Interpolation",
-      "Optimization: Maxima, Minima",
       "Vector Analysis: Gradient, Divergence, Curl",
-      "Vector Spaces, Linear Transformations"
+      "Differential Equations: First Order, Higher Order"
     ];
-
-    // Initialize tasks and topic statuses from localStorage
+    // Initialize data from localStorage
     let tasks = JSON.parse(localStorage.getItem('gateTasks')) || [];
-    let topicStatuses = JSON.parse(localStorage.getItem('gateTopicStatuses')) || {
-      EC: syllabus.EC.map(topic => ({ topic, status: "Not Started", notes: "" })),
-      DA: syllabus.DA.map(topic => ({ topic, status: "Not Started", notes: "" })),
-      GA: syllabus.GA.map(topic => ({ topic, status: "Not Started", notes: "" }))
-    };
+    let topicStatuses = JSON.parse(localStorage.getItem('gateTopicStatuses')) || {};
+    let selectedPapers = JSON.parse(localStorage.getItem('selectedPapers')) || [];
     let isDarkMode = JSON.parse(localStorage.getItem('darkMode')) || false;
-
     // Apply dark mode if enabled
     if (isDarkMode) {
       document.body.classList.add('dark-mode');
@@ -368,45 +491,86 @@
     } else {
       document.getElementById('darkModeButton').textContent = 'Enable Night Mode';
     }
-
+    // Populate paper selection dropdowns
+    const paper1Select = document.getElementById('paper1');
+    const paper2Select = document.getElementById('paper2');
+    Object.keys(syllabus).filter(p => p !== 'GA').forEach(paper => {
+      const option1 = document.createElement('option');
+      option1.value = paper;
+      option1.textContent = paper;
+      paper1Select.appendChild(option1);
+      const option2 = document.createElement('option');
+      option2.value = paper;
+      option2.textContent = paper;
+      paper2Select.appendChild(option2);
+    });
+    // Toggle paper input visibility
+    function togglePaperInputs() {
+      const numPapers = document.getElementById('numPapers').value;
+      document.getElementById('paper2Input').classList.toggle('hidden', numPapers === '1');
+      updateSecondaryPaperOptions();
+    }
+    // Update secondary paper options based on primary paper
+    function updateSecondaryPaperOptions() {
+      const primaryPaper = document.getElementById('paper1').value;
+      const paper2Select = document.getElementById('paper2');
+      paper2Select.innerHTML = '<option value="">Select Secondary Paper</option>';
+      allowedCombinations[primaryPaper].forEach(paper => {
+        const option = document.createElement('option');
+        option.value = paper;
+        option.textContent = paper;
+        paper2Select.appendChild(option);
+      });
+    }
+    // Save paper selection
+    function savePaperSelection() {
+      const numPapers = document.getElementById('numPapers').value;
+      const paper1 = document.getElementById('paper1').value;
+      const paper2 = document.getElementById('paper2').value;
+      if (!paper1 || (numPapers === '2' && !paper2)) {
+        alert('Please select all required papers.');
+        return;
+      }
+      if (numPapers === '2' && !allowedCombinations[paper1].includes(paper2)) {
+        alert('Invalid paper combination. Please select an allowed secondary paper.');
+        return;
+      }
+      selectedPapers = numPapers === '1' ? [paper1, 'GA'] : [paper1, paper2, 'GA'];
+      localStorage.setItem('selectedPapers', JSON.stringify(selectedPapers));
+      // Initialize topic statuses for selected papers
+      selectedPapers.forEach(paper => {
+        if (!topicStatuses[paper]) {
+          topicStatuses[paper] = syllabus[paper].map(topic => ({ topic, status: 'Not Started', difficulty: 'Moderate', notes: '' }));
+        }
+      });
+      localStorage.setItem('gateTopicStatuses', JSON.stringify(topicStatuses));
+      document.getElementById('paperModal').style.display = 'none';
+      updateUI();
+    }
     // Function to initiate reset with two-step confirmation
     function initiateReset() {
       if (confirm('Are you sure you want to reset all data?')) {
-        if (confirm('This will reset all statuses, notes, tasks, and dark mode settings. Proceed?')) {
+        if (confirm('This will reset all statuses, difficulties, notes, tasks, paper selection, and dark mode settings. Proceed?')) {
           resetData();
         }
       }
     }
-
     // Function to reset all data
     function resetData() {
-      // Clear localStorage
       localStorage.removeItem('gateTasks');
       localStorage.removeItem('gateTopicStatuses');
+      localStorage.removeItem('selectedPapers');
       localStorage.removeItem('darkMode');
-
-      // Reinitialize data
       tasks = [];
-      topicStatuses = {
-        EC: syllabus.EC.map(topic => ({ topic, status: "Not Started", notes: "" })),
-        DA: syllabus.DA.map(topic => ({ topic, status: "Not Started", notes: "" })),
-        GA: syllabus.GA.map(topic => ({ topic, status: "Not Started", notes: "" }))
-      };
+      topicStatuses = {};
+      selectedPapers = [];
       isDarkMode = false;
-
-      // Save reinitialized data to localStorage
-      localStorage.setItem('gateTasks', JSON.stringify(tasks));
-      localStorage.setItem('gateTopicStatuses', JSON.stringify(topicStatuses));
       localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
-
-      // Update UI
       document.body.classList.remove('dark-mode');
       document.getElementById('darkModeButton').textContent = 'Enable Night Mode';
-      updateTopicTables();
-      updateTaskTable();
-      updateCharts();
+      document.getElementById('paperModal').style.display = 'flex';
+      updateUI();
     }
-
     // Function to toggle dark mode
     function toggleDarkMode() {
       document.body.classList.toggle('dark-mode');
@@ -414,7 +578,6 @@
       document.getElementById('darkModeButton').textContent = isDarkMode ? 'Disable Night Mode' : 'Enable Night Mode';
       localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
     }
-
     // Function to update topic status
     function updateTopicStatus(subject, topic, status) {
       topicStatuses[subject] = topicStatuses[subject].map(item =>
@@ -425,7 +588,13 @@
       updateProgress();
       updateCharts();
     }
-
+    // Function to update topic difficulty
+    function updateTopicDifficulty(subject, topic, difficulty) {
+      topicStatuses[subject] = topicStatuses[subject].map(item =>
+        item.topic === topic ? { ...item, difficulty } : item
+      );
+      localStorage.setItem('gateTopicStatuses', JSON.stringify(topicStatuses));
+    }
     // Function to update topic notes
     function updateTopicNotes(subject, topic, notes) {
       topicStatuses[subject] = topicStatuses[subject].map(item =>
@@ -433,19 +602,44 @@
       );
       localStorage.setItem('gateTopicStatuses', JSON.stringify(topicStatuses));
     }
-
     // Function to update topic tables
     function updateTopicTables() {
-      const subjects = ['EC', 'DA', 'GA'];
-      subjects.forEach(subject => {
+      const topicTables = document.getElementById('topicTables');
+      topicTables.innerHTML = '';
+      selectedPapers.forEach(subject => {
+        const div = document.createElement('div');
+        div.innerHTML = `
+          <h3 class="text-lg font-medium text-${subject === 'GA' ? 'yellow' : subject === selectedPapers[0] ? 'blue' : 'green'}-600">${subject}</h3>
+          <div class="topic-table">
+            <table class="w-full border-collapse">
+              <thead>
+                <tr class="bg-gray-200">
+                  <th class="border p-2">Topic</th>
+                  <th class="border p-2">Tag</th>
+                  <th class="border p-2">Difficulty</th>
+                  <th class="border p-2">Status</th>
+                  <th class="border p-2">Notes</th>
+                </tr>
+              </thead>
+              <tbody id="${subject.toLowerCase()}Topics"></tbody>
+            </table>
+          </div>
+        `;
+        topicTables.appendChild(div);
         const tableBody = document.getElementById(`${subject.toLowerCase()}Topics`);
-        tableBody.innerHTML = '';
         topicStatuses[subject].forEach(item => {
           const isCommon = commonTopics.includes(item.topic);
           const row = document.createElement('tr');
           row.innerHTML = `
             <td class="border p-2">${item.topic}</td>
             <td class="border p-2">${isCommon ? '<span class="bg-purple-200 text-purple-800 px-2 py-1 rounded">Common</span>' : ''}</td>
+            <td class="border p-2">
+              <select onchange="updateTopicDifficulty('${subject}', '${item.topic}', this.value)" class="p-1 border rounded-md w-full">
+                <option value="Easy" ${item.difficulty === "Easy" ? "selected" : ""}>Easy</option>
+                <option value="Moderate" ${item.difficulty === "Moderate" ? "selected" : ""}>Moderate</option>
+                <option value="Hard" ${item.difficulty === "Hard" ? "selected" : ""}>Hard</option>
+              </select>
+            </td>
             <td class="border p-2">
               <select onchange="updateTopicStatus('${subject}', '${item.topic}', this.value)" class="p-1 border rounded-md w-full">
                 <option value="Not Started" ${item.status === "Not Started" ? "selected" : ""}>Not Started</option>
@@ -461,7 +655,6 @@
         });
       });
     }
-
     // Function to add a new task
     function addTask() {
       const taskDate = document.getElementById('taskDate').value;
@@ -469,12 +662,10 @@
       const topic = document.getElementById('topic').value;
       const status = document.getElementById('status').value;
       const notes = document.getElementById('notes').value;
-
-      if (!taskDate || !topic) {
-        alert('Please fill in Date and Topic.');
+      if (!taskDate || !topic || !subject) {
+        alert('Please fill in Date, Subject, and Topic.');
         return;
       }
-
       const task = { id: Date.now(), date: taskDate, subject, topic, status, notes };
       tasks.push(task);
       localStorage.setItem('gateTasks', JSON.stringify(tasks));
@@ -482,23 +673,20 @@
       clearForm();
       alert('Task added successfully!');
     }
-
     // Function to clear form inputs
     function clearForm() {
       document.getElementById('taskDate').value = new Date().toISOString().split('T')[0];
-      document.getElementById('subject').value = 'EC';
+      document.getElementById('subject').value = selectedPapers[0] || 'EC';
       document.getElementById('topic').value = '';
       document.getElementById('status').value = 'Not Started';
       document.getElementById('notes').value = '';
     }
-
     // Function to delete a task
     function deleteTask(id) {
       tasks = tasks.filter(task => task.id !== id);
       localStorage.setItem('gateTasks', JSON.stringify(tasks));
       updateTaskTable();
     }
-
     // Function to update task table
     function updateTaskTable() {
       const tableBody = document.getElementById('taskTable');
@@ -519,26 +707,38 @@
         tableBody.appendChild(row);
       });
     }
-
     // Function to update progress percentages
     function updateProgress() {
-      const subjects = ['EC', 'DA', 'GA'];
       const progress = {};
-      subjects.forEach(subject => {
+      selectedPapers.forEach(subject => {
         const totalTopics = topicStatuses[subject].length;
         const completedTopics = topicStatuses[subject].filter(item => item.status === 'Completed').length;
         const prog = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
-        document.getElementById(`${subject.toLowerCase()}Progress`).textContent = `${prog}%`;
         progress[subject] = prog;
+      });
+      const progressSummary = document.getElementById('progressSummary');
+      progressSummary.innerHTML = '';
+      selectedPapers.forEach(subject => {
+        const div = document.createElement('div');
+        div.className = `bg-${subject === 'GA' ? 'yellow' : subject === selectedPapers[0] ? 'blue' : 'green'}-100 p-4 rounded-md`;
+        div.innerHTML = `
+          <h3 class="font-medium">${subject} Completion</h3>
+          <p id="${subject.toLowerCase()}Progress" class="text-lg">${progress[subject]}%</p>
+        `;
+        progressSummary.appendChild(div);
       });
       return progress;
     }
-
     // Function to update charts
     function updateCharts() {
       const progress = updateProgress();
-      const subjects = ['EC', 'DA', 'GA'];
-      subjects.forEach(subject => {
+      const chartContainer = document.getElementById('chartContainer');
+      chartContainer.innerHTML = '';
+      selectedPapers.forEach(subject => {
+        const div = document.createElement('div');
+        div.className = 'chart-container';
+        div.innerHTML = `<canvas id="${subject.toLowerCase()}Chart" width="200" height="100"></canvas>`;
+        chartContainer.appendChild(div);
         const ctx = document.getElementById(`${subject.toLowerCase()}Chart`).getContext('2d');
         if (window[`${subject}Chart`]) {
           window[`${subject}Chart`].destroy();
@@ -567,14 +767,29 @@
         });
       });
     }
-
-    // Set default date to today
-    document.getElementById('taskDate').value = new Date().toISOString().split('T')[0];
-
-    // Initial updates
-    updateTopicTables();
-    updateTaskTable();
-    updateCharts();
+    // Function to update entire UI
+    function updateUI() {
+      if (!selectedPapers.length) {
+        document.getElementById('paperModal').style.display = 'flex';
+        return;
+      }
+      document.getElementById('trackerTitle').textContent = `GATE 2026 Progress Tracker (${selectedPapers.filter(p => p !== 'GA').join(' & ')})`;
+      const subjectSelect = document.getElementById('subject');
+      subjectSelect.innerHTML = '';
+      selectedPapers.forEach(paper => {
+        const option = document.createElement('option');
+        option.value = paper;
+        option.textContent = paper;
+        subjectSelect.appendChild(option);
+      });
+      updateTopicTables();
+      updateTaskTable();
+      updateCharts();
+      document.getElementById('taskDate').value = new Date().toISOString().split('T')[0];
+    }
+    // Initialize
+    paper1Select.addEventListener('change', updateSecondaryPaperOptions);
+    updateUI();
   </script>
 </body>
 </html>
