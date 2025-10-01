@@ -8,9 +8,10 @@ interface TaskManagementProps {
   tasks: Task[];
   onAddTask: (task: Omit<Task, 'id'>) => void;
   onDeleteTask: (id: number) => void;
+  onError?: (message: string) => void;
 }
 
-export default function TaskManagement({ selectedPapers, tasks, onAddTask, onDeleteTask }: TaskManagementProps) {
+export default function TaskManagement({ selectedPapers, tasks, onAddTask, onDeleteTask, onError }: TaskManagementProps) {
   const [taskDate, setTaskDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [subject, setSubject] = useState(selectedPapers[0] || '');
   const [topic, setTopic] = useState('');
@@ -25,7 +26,7 @@ export default function TaskManagement({ selectedPapers, tasks, onAddTask, onDel
 
   const handleAddTask = () => {
     if (!taskDate || !topic || !subject) {
-      alert('Please fill in Date, Subject, and Topic.');
+      onError?.('Please fill in Date, Subject, and Topic.');
       return;
     }
 
@@ -45,8 +46,6 @@ export default function TaskManagement({ selectedPapers, tasks, onAddTask, onDel
     setTopic('');
     setStatus('Not Started');
     setNotes('');
-    
-    alert('Task added successfully!');
   };
 
   const sortedTasks = [...tasks].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());

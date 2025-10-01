@@ -51,13 +51,16 @@ export default function TopicManagement({
                       const isCommon = commonTopics.includes(item.topic);
                       
                       return (
-                        <tr key={itemIndex} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                          <td className="border p-2 dark:text-white dark:border-gray-500">
+                        <tr key={itemIndex} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                          <td className="border p-2 dark:text-white dark:border-gray-500 font-medium">
                             {item.topic}
                           </td>
                           <td className="border p-2 dark:border-gray-500">
                             {isCommon && (
-                              <span className="bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 px-2 py-1 rounded text-xs">
+                              <span 
+                                className="bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 px-2 py-1 rounded text-xs font-medium"
+                                aria-label="Common topic across multiple papers"
+                              >
                                 Common
                               </span>
                             )}
@@ -66,7 +69,8 @@ export default function TopicManagement({
                             <select
                               value={item.difficulty}
                               onChange={(e) => onUpdateTopicDifficulty(subject, item.topic, e.target.value as TopicStatus['difficulty'])}
-                              className="p-1 border rounded-md w-full dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                              className="p-2 border rounded-md w-full dark:bg-gray-600 dark:border-gray-500 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                              aria-label={`Set difficulty level for ${item.topic}`}
                             >
                               <option value="Easy">Easy</option>
                               <option value="Moderate">Moderate</option>
@@ -77,7 +81,8 @@ export default function TopicManagement({
                             <select
                               value={item.status}
                               onChange={(e) => onUpdateTopicStatus(subject, item.topic, e.target.value as TopicStatus['status'])}
-                              className="p-1 border rounded-md w-full dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                              className="p-2 border rounded-md w-full dark:bg-gray-600 dark:border-gray-500 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                              aria-label={`Set completion status for ${item.topic}`}
                             >
                               <option value="Not Started">Not Started</option>
                               <option value="In Progress">In Progress</option>
@@ -88,9 +93,10 @@ export default function TopicManagement({
                             <textarea
                               value={item.notes}
                               onChange={(e) => onUpdateTopicNotes(subject, item.topic, e.target.value)}
-                              className="p-1 border rounded-md w-full resize-none dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                              className="p-2 border rounded-md w-full resize-none dark:bg-gray-600 dark:border-gray-500 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                               rows={2}
                               placeholder="Add notes (e.g., resources, doubts)"
+                              aria-label={`Add notes for ${item.topic}`}
                             />
                           </td>
                         </tr>

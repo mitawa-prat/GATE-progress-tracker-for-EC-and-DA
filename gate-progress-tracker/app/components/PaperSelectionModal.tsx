@@ -6,9 +6,10 @@ import { syllabus, allowedCombinations } from '../data/syllabus';
 interface PaperSelectionModalProps {
   isOpen: boolean;
   onSave: (papers: string[]) => void;
+  onError?: (message: string) => void;
 }
 
-export default function PaperSelectionModal({ isOpen, onSave }: PaperSelectionModalProps) {
+export default function PaperSelectionModal({ isOpen, onSave, onError }: PaperSelectionModalProps) {
   const [numPapers, setNumPapers] = useState<'1' | '2'>('1');
   const [paper1, setPaper1] = useState('');
   const [paper2, setPaper2] = useState('');
@@ -17,12 +18,12 @@ export default function PaperSelectionModal({ isOpen, onSave }: PaperSelectionMo
 
   const handleSave = () => {
     if (!paper1 || (numPapers === '2' && !paper2)) {
-      alert('Please select all required papers.');
+      onError?.('Please select all required papers.');
       return;
     }
 
     if (numPapers === '2' && !allowedCombinations[paper1]?.includes(paper2)) {
-      alert('Invalid paper combination. Please select an allowed secondary paper.');
+      onError?.('Invalid paper combination. Please select an allowed secondary paper.');
       return;
     }
 
@@ -37,9 +38,21 @@ export default function PaperSelectionModal({ isOpen, onSave }: PaperSelectionMo
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white dark:bg-gray-700 p-6 rounded-lg w-full max-w-md mx-4">
-        <h2 className="text-xl font-semibold mb-4 dark:text-white">Select GATE 2026 Papers</h2>
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+    >
+      <div className="bg-white dark:bg-gray-700 p-8 rounded-xl w-full max-w-lg mx-4 shadow-2xl transform transition-all">
+        <div className="flex items-center justify-between mb-6">
+          <h2 id="modal-title" className="text-2xl font-bold text-gray-900 dark:text-white">
+            Select GATE 2026 Papers
+          </h2>
+          <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+            <span className="text-blue-600 dark:text-blue-300 text-sm font-bold">📚</span>
+          </div>
+        </div>
         
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -97,9 +110,10 @@ export default function PaperSelectionModal({ isOpen, onSave }: PaperSelectionMo
 
         <button
           onClick={handleSave}
-          className="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 transition-colors"
+          className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white p-3 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          aria-label="Save paper selection and continue"
         >
-          Save Selection
+          Continue with Selected Papers
         </button>
       </div>
     </div>
